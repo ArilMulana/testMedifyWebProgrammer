@@ -7,34 +7,28 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class MasterItem extends Model
+class KategoriItem extends Model
 {
     use HasFactory;
     use SoftDeletes;
 
-    protected $table = 'master_items';
+    protected $table = 'kategori_items';
 
-    // DAFTARKAN SEMUA KOLOM YANG DIISI SAAT CREATE()
     protected $fillable = [
         'kode',
         'nama',
-        'harga_beli',
-        'laba',
-        'supplier',
-        'jenis',
-        'foto',
     ];
 
     /**
-     * Relasi many to many ke Kategori Items.
+     * Relasi many to many ke Master Items.
      */
-    public function kategoriItems(): BelongsToMany
+    public function masterItems(): BelongsToMany
     {
         return $this->belongsToMany(
-            KategoriItem::class,
+            MasterItem::class,
             'kategori_item_master_item',
-            'master_item_id',
-            'kategori_item_id'
+            'kategori_item_id',
+            'master_item_id'
         )->withTimestamps();
     }
 }

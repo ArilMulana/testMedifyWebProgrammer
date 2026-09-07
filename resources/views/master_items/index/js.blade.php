@@ -3,74 +3,18 @@
 <script src="https://cdn.datatables.net/1.12.1/js/dataTables.bootstrap5.min.js"></script>
 
 <script>
-    var start_date = '';
-    var end_date = '';
-    var data_per_fetch = 500;
-    var data_fetched = 0;
-
-    $(document).ready(function() {
+    // Filter kode, nama, harga_min, dan harga_max sudah ditangani sepenuhnya oleh
+    // server (form GET ke route /master-items -> MasterItemsController@index).
+    // Sebelumnya, di sini ada AJAX ke route "master-items/search" yang controller-nya
+    // sudah non-aktif (dikomentari) sehingga setiap kali halaman dimuat, DataTable
+    // langsung di-clear() tanpa pernah terisi ulang -> hasil filter harga min/max
+    // (dan filter lain) terlihat seperti tidak berfungsi meskipun data dari server
+    // sudah benar. Baris tersebut dihapus dan digantikan inisialisasi DataTable murni
+    // di sisi client, karena data yang ditampilkan sudah difilter oleh server.
+    $(document).ready(function () {
         $('#table').DataTable({
             searching: false,
-            order: [[0, 'desc']],
+            order: [[0, 'asc']],
         });
-        getData()
     });
-
-    $('.btn-get-data').click(function() {
-        getData()
-    })
-
-    function getData(){
-        
-        $('#loading-filter').show();
-        var dataTableObj = $('#table').DataTable();
-        var filter_kode = $('#filter-kode').val()
-        var filter_nama = $('#filter-nama').val()
-        var filter_harga_min = $('#filter-harga-min').val()
-        var filter_harga_max = $('#filter-harga-max').val()
-        dataTableObj.clear().draw();
-
-        $.ajax({
-            url: '{{url("master-items/search")}}',
-            dataType: 'json',
-            tryCount: 0,
-            retryLimit: 3,
-            data: 'kode=' + filter_kode + '&nama=' + filter_nama + '&hargamin=' + filter_harga_min + '&hargamax=' + filter_harga_max,
-            success: function(results) {
-                var data = results.data
-
-                $.each(data, function(index, item) {
-                    array_temp = [];
-                    var harga_jual = item.harga_beli + item.harga_beli * item.laba / 100;
-                    harga_jual = Math.round(harga_jual)
-                    var kode = item.kode;
-
-                    var html = `<a href="{{url('master-items/view/')}}/` + kode + `" class="btn btn-primary">View</a>`
-
-                    $.each(item, function(obj_name, obj_value) {
-                        if (obj_name == 'laba') return false;
-                        array_temp.push(obj_value)
-                    })
-                    array_temp.push(harga_jual)
-                    array_temp.push(item.supplier)
-                    array_temp.push(html)
-
-
-                    dataTableObj.row.add(array_temp).draw(true);
-                });
-                $('#loading-filter').hide();
-            },
-            error: function(xhr, textStatus, errorThrown) {
-                this.tryCount++;
-                if (this.tryCount <= this.retryLimit) {
-                    $.ajax(this);
-                    return;
-                }
-                alert('Terjadi kesalahan server, tidak dapat mengambil data')
-                $('#loading-filter').hide();
-
-                return;
-            }
-        })
-    }
 </script>
